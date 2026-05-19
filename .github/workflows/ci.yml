@@ -189,8 +189,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=josue_DSW01-Practica02
-            -Dsonar.organization=josue-organization
+            -Dsonar.projectKey=DSW01-Practica02
+            -Dsonar.organization=JosueS02
             -Dsonar.sources=apps/backend/src/main,apps/frontend/src
             -Dsonar.tests=apps/backend/src/test,apps/frontend/src
             -Dsonar.coverage.jacoco.xmlReportPaths=apps/backend/target/site/jacoco/jacoco.xml
