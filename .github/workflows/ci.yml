@@ -190,7 +190,7 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=DSW01-Practica02
-            -Dsonar.organization=JosueS02
+            -Dsonar.organization=josues02-org
             -Dsonar.sources=apps/backend/src/main,apps/frontend/src
             -Dsonar.tests=apps/backend/src/test,apps/frontend/src
             -Dsonar.coverage.jacoco.xmlReportPaths=apps/backend/target/site/jacoco/jacoco.xml
