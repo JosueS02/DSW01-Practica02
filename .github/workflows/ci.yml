@@ -193,10 +193,13 @@ jobs:
             -Dsonar.organization=josues02
             -Dsonar.sources=apps/backend/src/main,apps/frontend/src
             -Dsonar.tests=apps/backend/src/test,apps/frontend/src
+            -Dsonar.test.inclusions=**/*.spec.ts
+            -Dsonar.cpd.exclusions=**/*.spec.ts
             -Dsonar.coverage.jacoco.xmlReportPaths=apps/backend/target/site/jacoco/jacoco.xml
             -Dsonar.javascript.lcov.reportPaths=apps/frontend/coverage/lcov.info
             -Dsonar.eslint.reportPaths=apps/frontend/lint-report.json
             -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/target/**
+            
 
   docker-hub:
     name: Build & Push Docker Images
