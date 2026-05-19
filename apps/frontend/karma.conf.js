@@ -12,7 +12,24 @@ module.exports = function (config) {
     clients: {
       jasmine: {}
     },
-    reporters: ['progress', 'kjhtml'],
+    reporters: ['progress', 'kjhtml', 'coverage'],
+    coverageReporter: {
+      dir: require('path').join(__dirname, './coverage'),
+      subdir: '.',
+      reporters: [
+        { type: 'html' },
+        { type: 'text-summary' },
+        { type: 'lcovonly' }
+      ],
+      check: {
+        global: {
+          statements: 80,
+          branches: 80,
+          lines: 80,
+          functions: 80
+        }
+      }
+    },
     browsers: ['ChromeHeadless'],
     singleRun: false,
     restartOnFileChange: true
