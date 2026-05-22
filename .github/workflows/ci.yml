@@ -189,7 +189,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=josueS02_DSW01-Practica02
+            -Dsonar.projectKey=JosueS02_DSW01-Practica02
             -Dsonar.organization=josues02
             -Dsonar.sources=apps/backend/src/main,apps/frontend/src
             -Dsonar.tests=apps/backend/src/test,apps/frontend/src
