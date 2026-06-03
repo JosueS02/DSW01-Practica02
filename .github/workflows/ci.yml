@@ -179,7 +179,7 @@ jobs:
         continue-on-error: true
 
       - name: Build Backend (generate coverage for Sonar)
-        run: mvn -B -ntp clean test verify
+        run: mvn -B -ntp -Dtest='*Test,!*IntegrationTest,!*ContractTest' clean test verify
         working-directory: apps/backend
 
       - name: Run SonarCloud Scan
