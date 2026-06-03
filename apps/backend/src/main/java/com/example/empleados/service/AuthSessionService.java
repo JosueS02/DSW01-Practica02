@@ -15,6 +15,8 @@ import java.util.Optional;
 @Service
 public class AuthSessionService {
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     private final SesionAutenticadaRepository sesionAutenticadaRepository;
     private final int sessionHours;
 
@@ -34,7 +36,7 @@ public class AuthSessionService {
         session.setSessionId(generateSessionId());
         session.setEmpleado(empleado);
         session.setCreatedAt(now);
-        session.setExpiresAt(now.plusSeconds((long) sessionHours * 60L * 60L));
+        session.setExpiresAt(now.plusSeconds(sessionHours * 60L * 60L));
         return sesionAutenticadaRepository.save(session);
     }
 
@@ -81,7 +83,7 @@ public class AuthSessionService {
 
     private String generateSessionId() {
         byte[] bytes = new byte[32];
-        new SecureRandom().nextBytes(bytes);
+        SECURE_RANDOM.nextBytes(bytes);
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 }

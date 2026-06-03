@@ -36,7 +36,7 @@ public class AuthAuditService {
 
     @Transactional
     public void purgeExpiredAuditEntries() {
-        Instant cutoff = Instant.now().minusSeconds((long) retentionDays * 24L * 60L * 60L);
+        Instant cutoff = Instant.now().minusSeconds(retentionDays * 24L * 60L * 60L);
         intentoAutenticacionRepository.deleteByCreatedAtBefore(cutoff);
     }
 }

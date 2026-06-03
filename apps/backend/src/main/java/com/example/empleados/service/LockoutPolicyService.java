@@ -33,17 +33,15 @@ public class LockoutPolicyService {
 
         int failures = 0;
         Instant latestFailure = null;
-        for (IntentoAutenticacion attempt : attempts) {
+        for (int i = 0; i < attempts.size() && failures < maxFailures; i++) {
+            IntentoAutenticacion attempt = attempts.get(i);
             if (attempt.getResultado() == IntentoAutenticacion.Resultado.SUCCESS) {
-                break;
+                return false;
             }
             if (attempt.getResultado() == IntentoAutenticacion.Resultado.FAILURE) {
                 failures++;
                 if (latestFailure == null) {
                     latestFailure = attempt.getCreatedAt();
-                }
-                if (failures >= maxFailures) {
-                    break;
                 }
             }
         }
@@ -52,6 +50,6 @@ public class LockoutPolicyService {
             return false;
         }
 
-        return latestFailure.plusSeconds((long) lockoutMinutes * 60L).isAfter(Instant.now());
+        return latestFailure.plusSeconds(lockoutMinutes * 60L).isAfter(Instant.now());
     }
 }

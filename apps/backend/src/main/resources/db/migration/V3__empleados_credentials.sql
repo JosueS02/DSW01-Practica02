@@ -3,12 +3,14 @@ ADD COLUMN IF NOT EXISTS email VARCHAR(255),
 ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255),
 ADD COLUMN IF NOT EXISTS activo BOOLEAN DEFAULT TRUE;
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 UPDATE empleados
 SET email = CONCAT(lower(replace(nombre, ' ', '.')), '.', lower(clave), '@example.local')
 WHERE email IS NULL;
 
 UPDATE empleados
-SET password_hash = '$2a$10$QqfVjKjkpWfELVYf1A2fTeXf8vJ4aNqvk6DCe4kYvNys8lm2Sle8i'
+SET password_hash = crypt(gen_random_uuid()::text, gen_salt('bf'))
 WHERE password_hash IS NULL;
 
 UPDATE empleados
