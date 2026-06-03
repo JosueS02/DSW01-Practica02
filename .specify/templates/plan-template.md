@@ -31,7 +31,17 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- [ ] Stack gate: Uses Spring Boot 3 and Java 17 only.
+- [ ] Security gate: Defines HTTP Basic Auth behavior (protected/public endpoints,
+  credential source, and non-dev override strategy).
+- [ ] Data gate: Uses PostgreSQL and defines Docker runtime (`docker-compose` or
+  equivalent) for local/CI validation.
+- [ ] API contract gate: Includes OpenAPI/Swagger update scope for all changed
+  endpoints/models/errors.
+- [ ] Monorepo/frontend gate: Defines monorepo impact and confirms Angular 19
+  compatibility for frontend changes.
+- [ ] Config gate: Lists required `application.properties` keys and identifies
+  sensitive values externalized via env/secrets.
 
 ## Project Structure
 
@@ -56,39 +66,29 @@ specs/[###-feature]/
 -->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
+# [REMOVE IF UNUSED] Option 1: Monorepo (DEFAULT)
+apps/
+├── backend/
+│   ├── src/
+│   └── tests/
+└── frontend/
+  ├── src/
+  └── tests/
+
+packages/
+└── contracts/            # OpenAPI/shared DTO/schema artifacts
+
+infra/
+└── docker/               # compose/runtime assets
+
+# [REMOVE IF UNUSED] Option 2: Backend only (explicitly justified exception)
 src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+└── main/...
 
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+# [REMOVE IF UNUSED] Option 3: Mobile + API monorepo
+apps/api/
+apps/mobile-ios/ or apps/mobile-android/
+packages/contracts/
 ```
 
 **Structure Decision**: [Document the selected structure and reference the real

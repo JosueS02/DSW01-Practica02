@@ -1,0 +1,30 @@
+:root {
+	--bg-base: #f5f6f8;
+	--text-main: #13223d;
+	--text-muted: #4f5f7d;
+	--surface: #ffffff;
+	--line-soft: #d5dceb;
+	--brand: #0d9488;
+	--brand-strong: #0f766e;
+	--danger-soft: #fee2e2;
+	--danger-text: #991b1b;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	color: var(--text-main);
+	font-family: "Space Grotesk", "Avenir Next", "Montserrat", "Trebuchet MS", sans-serif;
+	background:
+		radial-gradient(circle at 12% 20%, rgba(13, 148, 136, 0.14), transparent 28%),
+		radial-gradient(circle at 88% 8%, rgba(15, 118, 110, 0.12), transparent 32%),
+		linear-gradient(160deg, #f8fafc 0%, #eff3f8 100%);
+}

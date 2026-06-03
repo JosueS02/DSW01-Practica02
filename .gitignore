@@ -1,0 +1,39 @@
+# Java / Spring Boot
+target/
+build/
+.gradle/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE / Editor
+.idea/
+.vscode/
+*.iml
+
+# OS / temp
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+
+# Logs
+*.log
+
+# Environment
+.env
+.env*
+
+# Python cache (local tooling)
+__pycache__/
+*.pyc
+
+# Docker / compose runtime
+*.pid
+
+# Dependencias 
+node_modules/
+
+# Cache de Angular (Evita el error de 100MB+ en GitHub)
+apps/frontend/.angular/

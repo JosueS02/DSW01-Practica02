@@ -1,0 +1,59 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: empleados-postgres
+    environment:
+      POSTGRES_DB: dsw01_practica02
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "55432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dsw01_practica02"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: ../apps/backend
+      dockerfile: Dockerfile
+    container_name: empleados-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      APP_DB_URL: jdbc:postgresql://postgres:5432/dsw01_practica02
+      APP_DB_USERNAME: postgres
+      APP_DB_PASSWORD: postgres
+      APP_SECURITY_USER: admin
+      APP_SECURITY_PASSWORD: admin123
+      APP_SECURITY_ROLES: ADMIN
+
+  frontend:
+    build:
+      context: ../apps/frontend
+      dockerfile: Dockerfile
+    container_name: empleados-frontend
+    depends_on:
+      app:
+        condition: service_started
+
+  proxy:
+    image: nginx:1.27-alpine
+    container_name: empleados-proxy
+    depends_on:
+      frontend:
+        condition: service_started
+      app:
+        condition: service_started
+    ports:
+      - "80:80"
+    volumes:
+      - ./proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+
+volumes:
+  postgres-data:

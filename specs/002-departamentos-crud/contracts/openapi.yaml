@@ -1,0 +1,377 @@
+openapi: 3.0.3
+info:
+  title: API Empleados y Departamentos
+  version: 1.1.0
+  description: Contrato para CRUD de empleados y departamentos con relación obligatoria.
+servers:
+  - url: http://localhost:8080
+security:
+  - basicAuth: []
+paths:
+  /api/departamentos:
+    get:
+      tags: [Departamentos]
+      summary: Listar departamentos
+      responses:
+        '200':
+          description: Lista de departamentos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DepartamentoResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      tags: [Departamentos]
+      summary: Crear departamento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDepartamentoRequest'
+      responses:
+        '201':
+          description: Departamento creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+  /api/departamentos/{id}:
+    get:
+      tags: [Departamentos]
+      summary: Obtener departamento por id
+      parameters:
+        - $ref: '#/components/parameters/DepartamentoId'
+      responses:
+        '200':
+          description: Departamento encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      tags: [Departamentos]
+      summary: Actualizar departamento
+      parameters:
+        - $ref: '#/components/parameters/DepartamentoId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDepartamentoRequest'
+      responses:
+        '200':
+          description: Departamento actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+    delete:
+      tags: [Departamentos]
+      summary: Eliminar departamento
+      parameters:
+        - $ref: '#/components/parameters/DepartamentoId'
+      responses:
+        '204':
+          description: Departamento eliminado
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: No se puede eliminar por empleados vinculados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/empleados:
+    get:
+      tags: [Empleados]
+      summary: Listar empleados
+      responses:
+        '200':
+          description: Lista de empleados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmpleadoResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+    post:
+      tags: [Empleados]
+      summary: Crear empleado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmpleadoRequest'
+      responses:
+        '201':
+          description: Empleado creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmpleadoResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Departamento no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/empleados/{clave}:
+    get:
+      tags: [Empleados]
+      summary: Obtener empleado por clave
+      parameters:
+        - $ref: '#/components/parameters/EmpleadoClave'
+      responses:
+        '200':
+          description: Empleado encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmpleadoResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    put:
+      tags: [Empleados]
+      summary: Actualizar empleado
+      parameters:
+        - $ref: '#/components/parameters/EmpleadoClave'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEmpleadoRequest'
+      responses:
+        '200':
+          description: Empleado actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmpleadoResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+    delete:
+      tags: [Empleados]
+      summary: Eliminar empleado
+      parameters:
+        - $ref: '#/components/parameters/EmpleadoClave'
+      responses:
+        '204':
+          description: Empleado eliminado
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  parameters:
+    DepartamentoId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^D-[0-9]{3,}$'
+    EmpleadoClave:
+      name: clave
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^E-[0-9]{3,}$'
+
+  responses:
+    BadRequestError:
+      description: Payload inválido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UnauthorizedError:
+      description: Autenticación requerida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFoundError:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ConflictError:
+      description: Conflicto de negocio
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    CreateDepartamentoRequest:
+      type: object
+      required: [nombre]
+      additionalProperties: false
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        descripcion:
+          type: string
+          minLength: 1
+          maxLength: 255
+
+    UpdateDepartamentoRequest:
+      type: object
+      required: [nombre]
+      additionalProperties: false
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        descripcion:
+          type: string
+          minLength: 1
+          maxLength: 255
+
+    DepartamentoResumen:
+      type: object
+      required: [id, nombre]
+      properties:
+        id:
+          type: string
+          pattern: '^D-[0-9]{3,}$'
+        nombre:
+          type: string
+
+    DepartamentoResponse:
+      type: object
+      required: [id, nombre]
+      properties:
+        id:
+          type: string
+          pattern: '^D-[0-9]{3,}$'
+        nombre:
+          type: string
+        descripcion:
+          type: string
+          nullable: true
+
+    CreateEmpleadoRequest:
+      type: object
+      required: [nombre, direccion, telefono, departamentoId]
+      additionalProperties: false
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        direccion:
+          type: string
+          minLength: 1
+          maxLength: 100
+        telefono:
+          type: string
+          minLength: 1
+          maxLength: 100
+        departamentoId:
+          type: string
+          pattern: '^D-[0-9]{3,}$'
+
+    UpdateEmpleadoRequest:
+      type: object
+      required: [nombre, direccion, telefono, departamentoId]
+      additionalProperties: false
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        direccion:
+          type: string
+          minLength: 1
+          maxLength: 100
+        telefono:
+          type: string
+          minLength: 1
+          maxLength: 100
+        departamentoId:
+          type: string
+          pattern: '^D-[0-9]{3,}$'
+
+    EmpleadoResponse:
+      type: object
+      required: [clave, nombre, direccion, telefono, departamento]
+      properties:
+        clave:
+          type: string
+          pattern: '^E-[0-9]{3,}$'
+        nombre:
+          type: string
+        direccion:
+          type: string
+        telefono:
+          type: string
+        departamento:
+          $ref: '#/components/schemas/DepartamentoResumen'
+
+    ErrorResponse:
+      type: object
+      required: [timestamp, status, error, message, path]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string

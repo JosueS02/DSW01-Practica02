@@ -89,11 +89,25 @@
 - **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
 - **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
 - **FR-005**: System MUST [behavior, e.g., "log all security events"]
+- **FR-006**: Backend implementation MUST target Spring Boot 3 with Java 17.
+- **FR-007**: API endpoints MUST define HTTP Basic Auth requirements, including
+  explicit public endpoint exceptions.
+- **FR-008**: Persistent data changes MUST be compatible with PostgreSQL runtime in
+  Docker-based local/CI environments.
+- **FR-009**: API changes MUST include synchronized OpenAPI/Swagger documentation.
+- **FR-010**: Repository-impact changes MUST specify monorepo layout updates and
+  cross-app contract implications when backend/frontend are both involved.
+- **FR-011**: Frontend implementation MUST use Angular 19 for new and modified UI
+  features unless superseded by an approved constitutional amendment.
+- **FR-012**: Configuration changes MUST specify affected `application.properties`
+  keys and secret externalization strategy.
 
 *Example of marking unclear requirements:*
 
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+- **FR-013**: System MUST authenticate users via [NEEDS CLARIFICATION: public route
+  list and role model not specified].
+- **FR-014**: System MUST retain user data for [NEEDS CLARIFICATION: retention period
+  not specified].
 
 ### Key Entities *(include if feature involves data)*
 

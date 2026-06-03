@@ -1,0 +1,290 @@
+openapi: 3.0.3
+info:
+  title: Empleados Auth API
+  version: 1.0.0
+  description: Login de empleados y ajuste de CRUD con email/password.
+servers:
+  - url: http://localhost:8080
+security:
+  - basicAuth: []
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Iniciar sesión de empleado
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login exitoso
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Cookie de sesión HttpOnly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '423':
+          description: Cuenta temporalmente bloqueada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Cerrar sesión de empleado
+      security:
+        - sessionAuth: []
+      responses:
+        '204':
+          description: Sesión invalidada
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/empleados:
+    post:
+      tags: [Empleados]
+      summary: Crear empleado con credenciales
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmpleadoRequest'
+      responses:
+        '201':
+          description: Empleado creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmpleadoResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          description: Conflicto por email duplicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/empleados/{clave}:
+    put:
+      tags: [Empleados]
+      summary: Actualizar empleado (password opcional)
+      parameters:
+        - name: clave
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^E-[0-9]{3,}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEmpleadoRequest'
+      responses:
+        '200':
+          description: Empleado actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmpleadoResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          description: Conflicto por email duplicado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: SESSION
+
+  schemas:
+    LoginRequest:
+      type: object
+      required: [email, password]
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    LoginResponse:
+      type: object
+      required: [empleado, sessionExpiresAt]
+      properties:
+        empleado:
+          type: object
+          required: [clave, nombre, email]
+          properties:
+            clave:
+              type: string
+              pattern: '^E-[0-9]{3,}$'
+            nombre:
+              type: string
+            email:
+              type: string
+              format: email
+        sessionExpiresAt:
+          type: string
+          format: date-time
+        authMode:
+          type: string
+          enum: [ui-session]
+
+    CreateEmpleadoRequest:
+      type: object
+      required: [nombre, direccion, telefono, email, password]
+      additionalProperties: false
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        direccion:
+          type: string
+          minLength: 1
+          maxLength: 100
+        telefono:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          description: Se normaliza con trim + lowercase.
+        password:
+          type: string
+          minLength: 8
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$'
+
+    UpdateEmpleadoRequest:
+      type: object
+      required: [nombre, direccion, telefono, email]
+      additionalProperties: false
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 100
+        direccion:
+          type: string
+          minLength: 1
+          maxLength: 100
+        telefono:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          description: Se normaliza con trim + lowercase.
+        password:
+          type: string
+          minLength: 8
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$'
+          description: Opcional; si se omite, se conserva la contraseña vigente.
+
+    EmpleadoResponse:
+      type: object
+      required: [clave, nombre, direccion, telefono, email]
+      properties:
+        clave:
+          type: string
+          pattern: '^E-[0-9]{3,}$'
+        nombre:
+          type: string
+        direccion:
+          type: string
+        telefono:
+          type: string
+        email:
+          type: string
+          format: email
+
+    AuthAuditEvent:
+      type: object
+      required: [email, resultado, createdAt]
+      properties:
+        email:
+          type: string
+          format: email
+        resultado:
+          type: string
+          enum: [SUCCESS, FAILURE]
+        motivo:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        retentionDays:
+          type: integer
+          example: 90
+
+    ErrorResponse:
+      type: object
+      required: [timestamp, status, error, message, path]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+
+  responses:
+    BadRequestError:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    UnauthorizedError:
+      description: No autenticado o credenciales inválidas
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFoundError:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
