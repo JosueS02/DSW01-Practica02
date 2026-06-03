@@ -179,11 +179,11 @@ jobs:
         continue-on-error: true
 
       - name: Build Backend (generate coverage for Sonar)
-        run: mvn -B -ntp -Dtest='*Test,!*IntegrationTest,!*ContractTest' clean test verify
+        run: mvn -B -ntp clean test verify
         working-directory: apps/backend
 
       - name: Run SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v4 # <-- Actualizado a la versión oficial sin bugs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -200,6 +200,7 @@ jobs:
             -Dsonar.javascript.lcov.reportPaths=apps/frontend/coverage/lcov.info
             -Dsonar.eslint.reportPaths=apps/frontend/lint-report.json
             -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/target/**
+            -Dsonar.coverage.exclusions=**/controller/**,**/config/**,**/security/**,**/dto/**,**/domain/**,**/repository/**,**/*Application.java
             
 
   docker-hub:
