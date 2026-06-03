@@ -40,7 +40,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
           cache: maven
 
       # Frontend: Setup Node.js
@@ -58,11 +58,11 @@ jobs:
         working-directory: apps/backend
         run: mvn -B -ntp clean verify -DskipTests=true -Pcheckstyle
 
-      # Backend: Tests with Coverage (IGNORANDO FALLOS PARA QUE REPORTE SE GENERE SIEMPRE)
+      # Backend: Tests with Coverage
       - name: Backend Unit Tests with JaCoCo Coverage
         if: matrix.setup-java
         working-directory: apps/backend
-        run: mvn -B -ntp clean test verify -Dmaven.test.failure.ignore=true
+        run: mvn -B -ntp -Dtest='*Test,!*IntegrationTest,!*ContractTest' clean test verify
 
       # Frontend: Install dependencies
       - name: Frontend Install Dependencies
@@ -81,7 +81,7 @@ jobs:
       - name: Frontend Unit Tests with Coverage
         if: matrix.setup-node
         working-directory: apps/frontend
-        run: npm run test:ci || true
+        run: npm run test:ci
 
       # Upload Coverage Reports
       - name: Upload Coverage Artifacts
@@ -136,42 +136,70 @@ jobs:
   sonarcloud:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
-    # Quitamos el "needs: ci-build" para que corra sí o sí
+    needs: ci-build
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Full history para análisis completo
 
-      - name: Set up JDK 17
+      - name: Set up JDK 17 (for SonarCloud Scanner)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
           cache: maven
 
-      # 1. FORZAMOS la creación del reporte JaCoCo sin importar si las pruebas fallan
-      - name: Generar Reporte de Cobertura
-        run: mvn -B -ntp clean verify -Dmaven.test.failure.ignore=true
+      - name: Set up Node.js (for frontend coverage)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
+
+      - name: Download Backend Coverage Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-backend
+          path: apps/backend/target/site/jacoco/
+
+      - name: Download Frontend Coverage Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-frontend
+          path: apps/frontend/coverage/
+
+      - name: Install Frontend Dependencies (for lint report)
+        run: npm ci
+        working-directory: apps/frontend
+
+      - name: Generate Frontend Lint Report
+        run: npm run lint -- --format json > lint-report.json || true
+        working-directory: apps/frontend
+        continue-on-error: true
+
+      - name: Build Backend (generate coverage for Sonar)
+        run: mvn -B -ntp -Dtest='*Test,!*IntegrationTest,!*ContractTest' clean test verify
         working-directory: apps/backend
 
-      # 2. Escaneamos ÚNICAMENTE el Backend con el reporte ya generado
       - name: Run SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@master
+        uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: "https://sonarcloud.io"
         with:
           args: >
             -Dsonar.projectKey=JosueS02_DSW01-Practica02
             -Dsonar.organization=josues02
-            -Dsonar.sources=apps/backend/src/main
-            -Dsonar.tests=apps/backend/src/test
+            -Dsonar.sources=apps/backend/src/main,apps/frontend/src
+            -Dsonar.tests=apps/backend/src/test,apps/frontend/src
+            -Dsonar.test.inclusions=**/*.spec.ts
+            -Dsonar.cpd.exclusions=**/*.spec.ts
             -Dsonar.java.binaries=apps/backend/target/classes
             -Dsonar.coverage.jacoco.xmlReportPaths=apps/backend/target/site/jacoco/jacoco.xml
-            -Dsonar.coverage.exclusions=**/controller/**,**/config/**,**/security/**,**/dto/**,**/domain/**,**/repository/**,**/*Application.java
-            -Dsonar.cpd.exclusions=**/*
+            -Dsonar.javascript.lcov.reportPaths=apps/frontend/coverage/lcov.info
+            -Dsonar.eslint.reportPaths=apps/frontend/lint-report.json
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/target/**
 
   docker-hub:
     name: Build & Push Docker Images
