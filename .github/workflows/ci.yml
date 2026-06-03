@@ -183,10 +183,11 @@ jobs:
         working-directory: apps/backend
 
       - name: Run SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v4 # <-- Actualizado a la versión oficial sin bugs
+        uses: SonarSource/sonarqube-scan-action@master # Usamos master para evitar advertencias de seguridad
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: "https://sonarcloud.io" # <--- ESTA ES LA PIEZA QUE FALTABA
         with:
           args: >
             -Dsonar.projectKey=JosueS02_DSW01-Practica02
@@ -201,8 +202,6 @@ jobs:
             -Dsonar.eslint.reportPaths=apps/frontend/lint-report.json
             -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/target/**
             -Dsonar.coverage.exclusions=**/controller/**,**/config/**,**/security/**,**/dto/**,**/domain/**,**/repository/**,**/*Application.java
-            
-
   docker-hub:
     name: Build & Push Docker Images
     runs-on: ubuntu-latest
