@@ -58,11 +58,11 @@ jobs:
         working-directory: apps/backend
         run: mvn -B -ntp clean verify -DskipTests=true -Pcheckstyle
 
-      # Backend: Tests with Coverage
+      # Backend: Tests with Coverage (¡CORREGIDO AQUÍ!)
       - name: Backend Unit Tests with JaCoCo Coverage
         if: matrix.setup-java
         working-directory: apps/backend
-        run: mvn -B -ntp -Dtest='*Test,!*IntegrationTest,!*ContractTest' clean test verify
+        run: mvn -B -ntp clean test verify
 
       # Frontend: Install dependencies
       - name: Frontend Install Dependencies
@@ -178,8 +178,9 @@ jobs:
         working-directory: apps/frontend
         continue-on-error: true
 
+      # Build Backend (generate coverage for Sonar) (¡CORREGIDO AQUÍ!)
       - name: Build Backend (generate coverage for Sonar)
-        run: mvn -B -ntp -Dtest='*Test,!*IntegrationTest,!*ContractTest' clean test verify
+        run: mvn -B -ntp clean test verify
         working-directory: apps/backend
 
       - name: Run SonarCloud Scan
